@@ -1,4 +1,5 @@
 import socket
+
 from p2p.connection_manager import ConnectionManager
 
 STATE_INIT = 0

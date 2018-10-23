@@ -2,8 +2,8 @@ import socket
 import threading
 
 from concurrent.futures import ThreadPoolExecutor
-from message_manager import MessageManager
-from .core_node_list import CoreNodeList
+from p2p.message_manager import MessageManager
+from p2p.core_node_list import CoreNodeList
 
 PING_INTERVAL = 1800
 
@@ -117,22 +117,22 @@ class ConnectionManager:
             if cmd == MSG_CORE_LIST:
                 print('Refresh the core node list...')
                 new_core_set = pickle.loads(payload.encode('utf-8'))
-                print('latest core node list: ' new_core_set)
+                print('latest core node list: ', new_core_set)
                 self.core_node_set.overwrite(new_core_set)
             else:
                 print('Unexpected status ', status)
 
-    def __add_peer(self):
+    def __add_peer(self, peer):
         print('Adding peer: ', peer)
         self.core_node_set.add((peer))
 
-    def __remove_peer(self):
+    def __remove_peer(self, peer):
         print('Removing peer: ', peer)
         self.core_node_set.remove(peer)
         print('Current Core list: ' , self.core_node_set.get_list())
 
     def __wait_for_access(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCKET_STREAM)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.host, self.port))
         self.socket.listen(0)
 
@@ -158,7 +158,7 @@ class ConnectionManager:
             current_list = current_list - set(dead_c_node_set)
             self.core_node_set.overwrite(current_list)
 
-        print('current core noe list: ' self.core_node_set.get_list())
+        print('current core noe list: ', self.core_node_set.get_list())
 
         if changed:
             cl = pickle.dumps(current_list, 0).decode()
