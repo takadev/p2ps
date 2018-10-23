@@ -7,14 +7,14 @@ class CoreNodeList:
 
     def add(self, peer):
         with self.lock:
-            print('Adding peer: ', peer)
+            print('Adding peer to Core list: ', peer)
             self.list.add((peer))
             print('Current Core list: ', self.list)
 
     def remove(self, peer):
         with self.lock:
             if peer in self.list:
-                print('Removing peer: ', peer)
+                print('Removing peer from Core list: ', peer)
                 self.list.remove(peer)
                 print('Current Core list: ', self.list)
 
