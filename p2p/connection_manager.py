@@ -1,9 +1,25 @@
 import socket
 import threading
-
+import pickle
+import codecs
 from concurrent.futures import ThreadPoolExecutor
-from p2p.message_manager import MessageManager
-from p2p.core_node_list import CoreNodeList
+
+from .core_node_list import CoreNodeList
+from .message_manager import (
+    MessageManager,
+    MSG_ADD,
+    MSG_REMOVE,
+    MSG_CORE_LIST,
+    MSG_REQUEST_CORE_LIST,
+    MSG_PING,
+    MSG_ADD_AS_EDGE,
+    MSG_REMOVE_EDGE,
+
+    ERR_PROTOCOL_UNMATCH,
+    ERR_VERSION_UNMATCH,
+    OK_WITH_PAYLOAD,
+    OK_WITHOUT_PAYLOAD,
+)
 
 PING_INTERVAL = 1800
 
@@ -107,7 +123,7 @@ class ConnectionManager:
                 return
             elif cmd == MSG_REQUEST_CORE_LIST:
                 print('List for Core nodes was requested')
-                cl = picle.dumps(self.core_node_set.get_list(), 0).decode()
+                cl = pickle.dumps(self.core_node_set.get_list(), 0).decode()
                 msg = self.mm.build(MSG_CORE_LIST, self.port, cl)
                 self.send_msg((addr[0], peer_port), msg)
             else:
