@@ -5,6 +5,7 @@ import codecs
 from concurrent.futures import ThreadPoolExecutor
 
 from .core_node_list import CoreNodeList
+from .edge_node_list import EdgeNodeList
 from .message_manager import (
     MessageManager,
     MSG_ADD,
@@ -13,7 +14,7 @@ from .message_manager import (
     MSG_REQUEST_CORE_LIST,
     MSG_PING,
     MSG_ADD_AS_EDGE,
-    MSG_REMOVE_EDGE,
+    MSG_REMOVE_AS_EDGE,
 
     ERR_PROTOCOL_UNMATCH,
     ERR_VERSION_UNMATCH,
@@ -29,6 +30,7 @@ class ConnectionManager:
         self.host = host
         self.port = my_port
         self.core_node_set = CoreNodeList()
+        self.edge_node_set = EdgeNodeList()
         self.__add_peer((host, my_port))
         self.mm = MessageManager()
     
@@ -126,6 +128,15 @@ class ConnectionManager:
                 cl = pickle.dumps(self.core_node_set.get_list(), 0).decode()
                 msg = self.mm.build(MSG_CORE_LIST, self.port, cl)
                 self.send_msg((addr[0], peer_port), msg)
+            elif cmd == MSG_ADD_AS_EDGE:
+                print('ADD_EDGE request was received!!')
+                self.__add_edge_node((addr[0], peer_port))
+                cl = pickle.dumps(self.core_node_set.get_list(), 0).decode()
+                msg = self.mm.build(MSG_CORE_LIST, self.port, cl)
+                self.send_msg((addr[0], peer_port), msg)
+            elif cmd == MSG_REMOVE_AS_EDGE:
+                print('REMOVE_EDGE request was received!! from', addr[0], peer_port)
+                self.__remove_edge_node((addr[0], peer_port))
             else:
                 print('received unkown command', cmd)
                 return
@@ -146,6 +157,12 @@ class ConnectionManager:
         print('Removing peer: ', peer)
         self.core_node_set.remove(peer)
         print('Current Core list: ' , self.core_node_set.get_list())
+
+    def __add_edge_node(self, edge):
+        self.edge_node_set.add((edge))
+
+    def __remove_edge_node(self, edge):
+        self.edge_node_set.remove(edge)
 
     def __wait_for_access(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
